@@ -56,10 +56,7 @@ begin
     left join properties pr on pr.id = coalesce(u.property_id, e.property_id)
     where e.status = 'POSTED' and e.charged_to = 'OWNER'
       and _safe_date(e.date_time) between p_from and p_to
-      and (
-        (c.id is not null and u.property_id in (select property_id from owner_contracts limit 1))
-        or (e.property_id in (select id from properties where owner_id = p_owner_id))
-      )
+      and pr.id in (select id from properties where owner_id = p_owner_id)
   ),
   settlement_rows as (
     select s.date::text as tx_date, 'تسوية مالية رقم ' || s.no as details,
