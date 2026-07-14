@@ -11,10 +11,10 @@ fi
 patterns=(
   'SUPABASE_SERVICE_ROLE_KEY'
   'sb_secret_'
-  'service_role"
-  'service_role'
+  '"role":"service_role"'
   'BEGIN PRIVATE KEY'
   'OPENAI_API_KEY'
+  'sk-proj-'
 )
 
 status=0
