@@ -30,6 +30,7 @@ This directory contains the maintained sources of truth for the Rentrix reposito
 - [`ENGINEERING_GOVERNANCE.md`](ENGINEERING_GOVERNANCE.md) — engineering policy.
 - [`GOVERNANCE.md`](GOVERNANCE.md) and [`GOVERNANCE_LOG.md`](GOVERNANCE_LOG.md) — production-change controls and audit log.
 - [`RELEASE_READINESS.md`](RELEASE_READINESS.md) — release-readiness criteria.
+- [`RELEASE_BLOCKER_GATE.md`](RELEASE_BLOCKER_GATE.md) — executable gate for the five launch-blocking risks only.
 - [`LIVE_VERIFICATION_READINESS.md`](LIVE_VERIFICATION_READINESS.md) — live verification status and prerequisites.
 - [`SEEDED_STAGING_READINESS_RUNBOOK.md`](SEEDED_STAGING_READINESS_RUNBOOK.md) — controlled staging validation.
 
