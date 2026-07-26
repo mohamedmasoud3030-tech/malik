@@ -1,5 +1,6 @@
 import type { Contract, Expense, Invoice, Person, Property, Receipt, Unit } from '@/types/domain';
 import { getCurrencySymbol, getCurrencyWordConfig, numberToArabicWords } from '@/lib/numberToArabicWords';
+import { getCurrencyMinorUnit } from '@/lib/formatters';
 import { TableGenerator } from './TableGenerator';
 import type { DocumentCompanyIdentity, DocumentRequest, SignatureRole, UnifiedDocumentModel } from './types';
 
@@ -105,7 +106,7 @@ export class MissingCompanyIdentityError extends Error {
   }
 }
 
-const fmtDate = (v?: string | null) => (v ? new Date(v).toLocaleDateString('ar-OM') : '-');
+const fmtDate = (v?: string | null) => (v ? new Date(v).toLocaleDateString('ar-OM', { numberingSystem: 'latn' }) : '-');
 
 function assertCompanyIdentity(settings: DocumentSettings): DocumentCompanyIdentity {
   const company = settings?.company;
@@ -119,8 +120,11 @@ const currencyOf = (s: DocumentSettings) => getCurrencySymbol(assertCompanyIdent
 const wordsOf = (amount: number, s: DocumentSettings) =>
   numberToArabicWords(amount, getCurrencyWordConfig(assertCompanyIdentity(s).defaultCurrency));
 
-const toMoney = (value: number, s: DocumentSettings) =>
-  `${Number.isFinite(value) ? value.toLocaleString('ar-OM', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '0.000'} ${currencyOf(s)}`;
+const toMoney = (value: number, s: DocumentSettings) => {
+  const minorUnit = getCurrencyMinorUnit(assertCompanyIdentity(s).defaultCurrency);
+  const fallback = (0).toFixed(minorUnit);
+  return `${Number.isFinite(value) ? value.toLocaleString('ar-OM', { minimumFractionDigits: minorUnit, maximumFractionDigits: minorUnit, numberingSystem: 'latn' }) : fallback} ${currencyOf(s)}`;
+};
 
 const baseHeader = (s: DocumentSettings, title: string, dateValue?: string, documentNo?: string) => {
   const company = assertCompanyIdentity(s);
@@ -144,7 +148,7 @@ const formatDocumentValue = (value: unknown): string => {
   if (value == null) return '—';
   if (typeof value === 'string') return value;
   if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') return String(value);
-  if (value instanceof Date) return Number.isNaN(value.getTime()) ? '—' : value.toLocaleDateString('ar-OM');
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? '—' : value.toLocaleDateString('ar-OM', { numberingSystem: 'latn' });
   if (Array.isArray(value) || typeof value === 'object') {
     try {
       return JSON.stringify(value);

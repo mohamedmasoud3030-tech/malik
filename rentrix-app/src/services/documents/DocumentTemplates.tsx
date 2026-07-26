@@ -11,6 +11,7 @@
  */
 
 import { getCurrencySymbol, getCurrencyWordConfig, numberToArabicWords } from '@/lib/numberToArabicWords';
+import { getCurrencyMinorUnit } from '@/lib/formatters';
 import { DocumentRenderer, DocumentRenderError } from './DocumentRenderer';
 import type { UnifiedDocumentModel } from './types';
 
@@ -196,7 +197,8 @@ function amountToWords(amount: number, settings: DocumentSettings): string {
 
 function formatMoney(amount: number, settings: DocumentSettings): string {
   const symbol = currencySymbolOf(settings);
-  return `${amount.toLocaleString('ar-OM', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} ${symbol}`;
+  const minorUnit = getCurrencyMinorUnit(settings.currency);
+  return `${amount.toLocaleString('ar-OM', { minimumFractionDigits: minorUnit, maximumFractionDigits: minorUnit, numberingSystem: 'latn' })} ${symbol}`;
 }
 
 function formatDate(dateStr: string, locale = 'ar-OM'): string {
@@ -209,6 +211,7 @@ function formatDate(dateStr: string, locale = 'ar-OM'): string {
     year: 'numeric',
     month: 'long',
     day: 'numeric',
+    numberingSystem: 'latn',
   });
 }
 

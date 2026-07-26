@@ -626,5 +626,6 @@ function formatCommunicationTimestamp(value: string | null | undefined) {
   return new Intl.DateTimeFormat("ar", {
     dateStyle: "medium",
     timeStyle: "short",
+    numberingSystem: "latn",
   }).format(new Date(value));
 }

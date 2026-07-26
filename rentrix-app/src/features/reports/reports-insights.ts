@@ -33,7 +33,7 @@ function safeRatio(numerator: number, denominator: number) {
 }
 
 export function formatPercent(value: number) {
-  return `${Math.round(value).toLocaleString('ar')}%`;
+  return `${Math.round(value).toLocaleString('ar', { numberingSystem: 'latn' })}%`;
 }
 
 export function getRatioTone(value: number, goodThreshold: number, warningThreshold: number): ReportHealthInsight['tone'] {

@@ -90,12 +90,12 @@ export function PropertyAnalyticsSection({ occupancyRows, expenseRows, isLoading
               property.occupied,
               property.vacant,
               `${rate}%`,
-              `${property.expenses.toLocaleString('ar-OM')} ${currencySymbol}`,
+              `${property.expenses.toLocaleString('ar-OM', { numberingSystem: 'latn' })} ${currencySymbol}`,
             ];
           }),
         },
       ],
-      totalSummary: `إجمالي العقارات: ${propertyMap.size} | إشغال المحفظة: ${overallOccupancyRate}% | المصروف لكل وحدة مشغولة: ${expensePerOccupiedUnit.toLocaleString('ar-OM')} ${currencySymbol}`,
+      totalSummary: `إجمالي العقارات: ${propertyMap.size} | إشغال المحفظة: ${overallOccupancyRate}% | المصروف لكل وحدة مشغولة: ${expensePerOccupiedUnit.toLocaleString('ar-OM', { numberingSystem: 'latn' })} ${currencySymbol}`,
     };
   };
 
@@ -118,17 +118,17 @@ export function PropertyAnalyticsSection({ occupancyRows, expenseRows, isLoading
   return (
     <div className="space-y-4">
       <ResponsiveCardGrid>
-        <KpiCard label="العقارات المدارة" value={totalProperties.toLocaleString('ar')} icon={Building2} sub={`${totalPortfolioUnits.toLocaleString('ar')} وحدة`} />
-        <KpiCard label="إشغال المحفظة" value={`${overallOccupancyRate}%`} icon={TrendingUp} sub={`${totalOccupiedUnits.toLocaleString('ar')} وحدة مشغولة`} />
-        <KpiCard label="مصروف للوحدة المشغولة" value={formatMoney(expensePerOccupiedUnit)} icon={WalletCards} sub={`${totalExpenses.toLocaleString('ar-OM')} إجمالي المصروفات`} />
-        <KpiCard label="الوحدات الشاغرة" value={totalVacantUnits.toLocaleString('ar')} icon={DoorOpen} sub="فرص تأجير متاحة" />
+        <KpiCard label="العقارات المدارة" value={totalProperties.toLocaleString('ar', { numberingSystem: 'latn' })} icon={Building2} sub={`${totalPortfolioUnits.toLocaleString('ar', { numberingSystem: 'latn' })} وحدة`} />
+        <KpiCard label="إشغال المحفظة" value={`${overallOccupancyRate}%`} icon={TrendingUp} sub={`${totalOccupiedUnits.toLocaleString('ar', { numberingSystem: 'latn' })} وحدة مشغولة`} />
+        <KpiCard label="مصروف للوحدة المشغولة" value={formatMoney(expensePerOccupiedUnit)} icon={WalletCards} sub={`${totalExpenses.toLocaleString('ar-OM', { numberingSystem: 'latn' })} إجمالي المصروفات`} />
+        <KpiCard label="الوحدات الشاغرة" value={totalVacantUnits.toLocaleString('ar', { numberingSystem: 'latn' })} icon={DoorOpen} sub="فرص تأجير متاحة" />
       </ResponsiveCardGrid>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <ReportProgress
           label="إشغال المحفظة"
           value={overallOccupancyRate}
-          helper={`${totalOccupiedUnits.toLocaleString('ar')} من ${totalPortfolioUnits.toLocaleString('ar')} وحدة`}
+          helper={`${totalOccupiedUnits.toLocaleString('ar', { numberingSystem: 'latn' })} من ${totalPortfolioUnits.toLocaleString('ar', { numberingSystem: 'latn' })} وحدة`}
           tone={overallOccupancyRate >= 90 ? 'good' : overallOccupancyRate >= 75 ? 'warning' : 'critical'}
         />
         <ReportProgress
@@ -179,8 +179,8 @@ export function PropertyAnalyticsSection({ occupancyRows, expenseRows, isLoading
                 <ReportListRow
                   key={row.propertyId}
                   title={row.property}
-                  subtitle={`${row.occupied.toLocaleString('ar')} مشغولة · ${row.vacant.toLocaleString('ar')} شاغرة · ${expense?.count.toLocaleString('ar') ?? '٠'} مصروفات`}
-                  meta={`${units.toLocaleString('ar')} وحدة · ${formatMoney(propertyExpensePerOccupied)} للوحدة المشغولة`}
+                  subtitle={`${row.occupied.toLocaleString('ar', { numberingSystem: 'latn' })} مشغولة · ${row.vacant.toLocaleString('ar', { numberingSystem: 'latn' })} شاغرة · ${expense?.count.toLocaleString('ar', { numberingSystem: 'latn' }) ?? '٠'} مصروفات`}
+                  meta={`${units.toLocaleString('ar', { numberingSystem: 'latn' })} وحدة · ${formatMoney(propertyExpensePerOccupied)} للوحدة المشغولة`}
                   value={(
                     <div className="text-end">
                       <p dir="ltr">{rate}%</p>

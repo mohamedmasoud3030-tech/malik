@@ -57,6 +57,7 @@ export function formatMoney({ amount, currency = DEFAULT_CURRENCY, locale = DEFA
     currencyDisplay,
     minimumFractionDigits: metadata.minorUnit,
     maximumFractionDigits: metadata.minorUnit,
+    numberingSystem: 'latn',
   }).format(safeAmount);
 }
 
@@ -77,6 +78,7 @@ export function formatNumber({
   return new Intl.NumberFormat(locale, {
     maximumFractionDigits,
     minimumFractionDigits,
+    numberingSystem: 'latn',
   }).format(safeValue);
 }
 
@@ -91,7 +93,7 @@ export function formatDate({ value, locale = DEFAULT_LOCALE, timeZone, dateStyle
   if (value === null || value === undefined || value === '') return '—';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat(locale, { dateStyle, timeZone }).format(date);
+  return new Intl.DateTimeFormat(locale, { dateStyle, timeZone, numberingSystem: 'latn' }).format(date);
 }
 
 export type DateTimeFormatOptions = DateFormatOptions & {
@@ -108,5 +110,5 @@ export function formatDateTime({
   if (value === null || value === undefined || value === '') return '—';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat(locale, { dateStyle, timeStyle, timeZone }).format(date);
+  return new Intl.DateTimeFormat(locale, { dateStyle, timeStyle, timeZone, numberingSystem: 'latn' }).format(date);
 }

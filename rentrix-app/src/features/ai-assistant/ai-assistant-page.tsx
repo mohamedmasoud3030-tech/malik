@@ -74,7 +74,7 @@ function createMessage(role: AiAssistantMessage['role'], content: string, action
 }
 
 function toArabicCount(value: number): string {
-  return new Intl.NumberFormat('ar').format(value);
+  return new Intl.NumberFormat('ar', { numberingSystem: 'latn' }).format(value);
 }
 
 function getErrorMessage(error: unknown): string | null {
