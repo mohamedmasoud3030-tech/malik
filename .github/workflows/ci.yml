@@ -81,6 +81,10 @@ jobs:
           VITE_SUPABASE_URL: https://nnggcnpcuomwfuupupwg.supabase.co
           VITE_SUPABASE_ANON_KEY: sb_publishable_JeLckFV2xYl78rei1-Q_EA_WcHif6WW
         run: pnpm build
+      # Confirms finance hub lazy loading survives in the built output: source
+      # can keep saying lazy() while the bundler inlines every section.
+      - name: Verify finance hub code splitting
+        run: pnpm --filter ./rentrix-app run check:finance-bundles
       - run: pnpm --filter ./rentrix-app run typecheck:test
       - name: Run full application tests
         id: full-tests

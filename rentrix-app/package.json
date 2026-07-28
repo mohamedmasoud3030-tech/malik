@@ -12,6 +12,7 @@
     "test": "vitest run --config vite.config.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
     "check:architecture": "node scripts/check-architecture.mjs",
+    "check:finance-bundles": "node scripts/check-finance-hub-bundles.mjs",
     "test:financials": "vitest run --config vite.config.ts --dir src/features/financials",
     "e2e": "playwright test --config playwright.config.ts",
     "e2e:headed": "playwright test --config playwright.config.ts --headed"
