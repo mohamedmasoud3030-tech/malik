@@ -1,537 +1,183 @@
-import {
-  Building2,
-  CircleCheck,
-  Download,
-  Edit,
-  Handshake,
-  MapPin,
-  Plus,
-  Trash2,
-  TriangleAlert,
-} from "lucide-react";
+import { Building2, Download, Edit, Plus, Trash2, ChevronDown, ChevronUp, DoorOpen } from "lucide-react";
+import { useState } from "react";
 import { PropertyFormModal } from "./property-form-modal";
 import { usePropertyListController } from "./use-property-list-controller";
-import { AsyncContentState } from "@/components/async-content-state";
-import { ListPage } from "@/components/layout/list-page";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EntityCell } from "@/components/ui/entity-cell";
-import { OperationalCommandPanel, OperationalMetricCard } from "@/components/ui/operational-summary";
 import { Select } from "@/components/ui/select";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ActiveFilterBar } from "@/components/ui/active-filter-bar";
-import { DataTable } from "@/components/ui/data-table";
-import { MobileCard } from "@/components/ui/mobile-card";
-import { ActionMenu } from "@/components/ui/action-menu";
-import { EntityCard } from "@/components/ui/entity-card";
-import { ResponsiveCardGrid } from "@/components/ui/responsive-card-grid";
-import { ViewModeToggle } from "@/components/ui/view-mode-toggle";
-import { useViewModePreference } from "@/hooks/use-view-mode-preference";
-import { getAppLanguageState, translateSharedLabel } from "@/lib/i18n";
+import { EnterprisePage } from "@/components/enterprise/enterprise-page";
+import { EnterpriseStats } from "@/components/enterprise/enterprise-stats";
+import { EnterpriseDataTable } from "@/components/enterprise/enterprise-data-table";
 import { toast } from "sonner";
-import {
-  buildPropertiesCsvBlob,
-  buildPropertiesCsvFilename,
-} from "./property-list-export";
+import { buildPropertiesCsvBlob, buildPropertiesCsvFilename } from "./property-list-export";
 import { propertyStatusTone } from "./components/property-status";
 import type { PropertyListItem } from "./property-service";
+import { getAppLanguageState, translateSharedLabel } from "@/lib/i18n";
+import { useUnits } from "@/features/units/use-units";
 
-function formatCount(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
-}
+function formatCount(value: number) { return new Intl.NumberFormat("en-US").format(value); }
 
 function PropertyWorkflowStatus({ property }: Readonly<{ property: PropertyListItem }>) {
-  const label = property.workflow_health === "ready"
-    ? "جاهز للتشغيل"
-    : property.workflow_health === "missing_owner"
-      ? "يحتاج مالكاً"
-      : property.workflow_health === "owner_unavailable"
-        ? "المالك غير نشط"
-        : "يحتاج اتفاقية";
-
-  const ownerSummary = property.workflow_health === "owner_unavailable"
-    ? property.current_owner_name
-      ? `المالك المرتبط غير نشط: ${property.current_owner_name}`
-      : "سجل المالك المرتبط غير متاح"
-    : property.current_owner_name
-      ? `المالك: ${property.current_owner_name}`
-      : "لا يوجد ربط ملكية ساري";
-
+  const label = property.workflow_health === "ready" ? "جاهز" : property.workflow_health === "missing_owner" ? "يحتاج مالكاً" : property.workflow_health === "owner_unavailable" ? "المالك غير نشط" : "يحتاج اتفاقية";
+  const owner = property.current_owner_name ? `المالك: ${property.current_owner_name}` : "لا يوجد ربط ساري";
   return (
     <div className="space-y-1">
-      <StatusBadge tone={property.workflow_health === "ready" ? "success" : "warning"}>
-        {label}
-      </StatusBadge>
-      <p className="text-xs text-muted-foreground">{ownerSummary}</p>
+      <StatusBadge tone={property.workflow_health === "ready" ? "success" : "warning"}>{label}</StatusBadge>
+      <p className="text-[11px] text-muted-foreground">{owner}</p>
     </div>
   );
 }
 
-export type PropertiesListPageProps = Readonly<{
-  embedded?: boolean;
-}>;
+function PropertyInlineUnits({ propertyId }: { propertyId: string }) {
+  const q = useUnits(propertyId);
+  if (q.isLoading) return <p className="p-3 text-xs text-muted-foreground">جارٍ تحميل الوحدات...</p>;
+  const units = q.data ?? [];
+  if (units.length === 0) return <p className="p-3 text-xs text-muted-foreground">لا توجد وحدات — أضف وحدة لهذا العقار.</p>;
+  return (
+    <div className="border-t border-border/60 bg-muted/20 p-3">
+      <div className="mb-2 flex items-center gap-2 text-xs font-bold">
+        <DoorOpen className="size-3.5" /> الوحدات ({units.length}) — كل وحدة مع المستأجر وحالتها
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        {units.map((u) => (
+          <div key={u.id} className="flex items-center justify-between rounded-xl border bg-card px-3 py-2 text-xs">
+            <span className="font-bold">{u.unit_number ?? u.id.slice(0,6)}</span>
+            <span className="text-muted-foreground">{(u as unknown as { status?: string }).status ?? "—"}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export type PropertiesListPageProps = Readonly<{ embedded?: boolean }>;
 
 export function PropertiesListPage({ embedded = false }: PropertiesListPageProps) {
   const controller = usePropertyListController();
-  const [viewMode, setViewMode] = useViewModePreference(
-    "rentrix:view-mode:properties",
-  );
-
-  const readyCount = controller.properties.filter(
-    (property) => property.workflow_health === "ready",
-  ).length;
-  const linkedOwnerCount = controller.properties.filter(
-    (property) => Boolean(property.current_owner_name),
-  ).length;
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const readyCount = controller.properties.filter((p) => p.workflow_health === "ready").length;
+  const linkedOwnerCount = controller.properties.filter((p) => Boolean(p.current_owner_name)).length;
   const attentionCount = controller.properties.length - readyCount;
-  const readinessRate = controller.properties.length > 0
-    ? Math.round((readyCount / controller.properties.length) * 100)
-    : 0;
 
   const handleExportCsv = () => {
-    if (controller.properties.length === 0) {
-      toast.error(
-        translateSharedLabel("noResultsHint", getAppLanguageState().language),
-      );
-      return;
-    }
+    if (controller.properties.length === 0) { toast.error(translateSharedLabel("noResultsHint", getAppLanguageState().language)); return; }
     try {
       const url = URL.createObjectURL(buildPropertiesCsvBlob(controller.properties));
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = buildPropertiesCsvFilename(new Date());
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-      toast.success(
-        translateSharedLabel("exportCsv", getAppLanguageState().language),
-      );
-    } catch (error) {
-      console.error("Failed to export properties CSV:", error);
-      toast.error("تعذر تصدير الملف");
-    }
+      const link = document.createElement("a"); link.href = url; link.download = buildPropertiesCsvFilename(new Date()); link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 100); toast.success(translateSharedLabel("exportCsv", getAppLanguageState().language));
+    } catch { toast.error("تعذر تصدير الملف"); }
   };
+
+  const content = (
+    <>
+      <EnterpriseStats
+        items={[
+          { key: "total", label: "إجمالي العقارات", value: formatCount(controller.totalCount), icon: Building2 },
+          { key: "linked", label: "مرتبطة بمالك", value: formatCount(linkedOwnerCount), icon: Building2 },
+          { key: "ready", label: "جاهزة", value: formatCount(readyCount), icon: Building2 },
+          { key: "attention", label: "تحتاج متابعة", value: formatCount(attentionCount), icon: Building2 },
+        ]}
+      />
+
+      <EnterpriseDataTable
+        rows={controller.properties}
+        keyOf={(p) => p.id}
+        aria-label="جدول العقارات"
+        isLoading={controller.propertiesQuery.isLoading}
+        error={controller.propertiesQuery.error}
+        onRetry={() => controller.propertiesQuery.refetch()}
+        emptyTitle={controller.hasFilterValues ? "لا توجد نتائج" : "لم تُضف عقارات بعد"}
+        emptyDescription={controller.hasFilterValues ? "جرّب تغيير البحث أو الفلتر." : "ابدأ بإضافة أول عقار."}
+        emptyAction={!controller.hasFilterValues ? <Button onClick={controller.openCreateModal}><Plus className="me-2 size-4" />إضافة أول عقار</Button> : undefined}
+        onRowClick={(p) => controller.navigateToProperty(p.id)}
+        rowActions={(p) => [
+          { id: "toggle", label: expandedId === p.id ? "إخفاء الوحدات" : "عرض الوحدات", icon: expandedId === p.id ? ChevronUp : ChevronDown, onClick: () => setExpandedId(expandedId === p.id ? null : p.id) },
+          { id: "edit", label: "تعديل", icon: Edit, onClick: () => controller.openEditModal(p.id) },
+          { id: "archive", label: "أرشفة", icon: Trash2, variant: "destructive", onClick: () => controller.requestArchive(p.id, p.title ?? "عقار") },
+        ]}
+        renderMobileCard={(property) => (
+          <div className="rounded-2xl border bg-card p-3 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-sm">{property.title ?? "عقار"}</span>
+              <StatusBadge tone={propertyStatusTone[property.status as keyof typeof propertyStatusTone] ?? "gray"}>{controller.statusLabels[property.status as keyof typeof controller.statusLabels] ?? property.status}</StatusBadge>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{property.address ?? "—"}</p>
+            <div className="mt-2"><PropertyWorkflowStatus property={property} /></div>
+            {expandedId === property.id ? <PropertyInlineUnits propertyId={property.id} /> : null}
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button variant="secondary" className="min-h-9 text-xs" onClick={() => controller.openEditModal(property.id)}><Edit className="size-3.5 me-1" />تعديل</Button>
+              <Button variant="secondary" className="min-h-9 text-xs" onClick={() => setExpandedId(expandedId === property.id ? null : property.id)}>{expandedId === property.id ? <ChevronUp className="size-3.5 me-1" /> : <ChevronDown className="size-3.5 me-1" />}{expandedId === property.id ? "إخفاء" : "الوحدات"}</Button>
+            </div>
+          </div>
+        )}
+        columns={[
+          { key: "title", header: "العقار", cell: (p) => <EntityCell icon={Building2} title={p.title ?? "—"} /> },
+          { key: "status", header: "الحالة", cell: (p) => <StatusBadge tone={propertyStatusTone[p.status as keyof typeof propertyStatusTone] ?? "gray"}>{controller.statusLabels[p.status as keyof typeof controller.statusLabels] ?? p.status}</StatusBadge> },
+          { key: "workflow", header: "المالك", cell: (p) => <PropertyWorkflowStatus property={p} /> },
+          { key: "address", header: "العنوان", cell: (p) => <span className="text-xs text-muted-foreground">{p.address ?? "—"}</span> },
+        ]}
+        pagination={controller.totalPages > 1 ? { page: controller.page, pageSize: 10, total: controller.totalCount, onPageChange: (v) => controller.setPage(v) } : undefined}
+      />
+
+      {expandedId ? (
+        <div className="rounded-2xl border bg-card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
+            <span className="text-sm font-bold">وحدات العقار — تفاصيل سريعة</span>
+            <Button variant="ghost" size="sm" onClick={() => setExpandedId(null)}>إغلاق</Button>
+          </div>
+          <PropertyInlineUnits propertyId={expandedId} />
+        </div>
+      ) : null}
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        <div className="space-y-4">
+          <div className="flex items-center justify-end gap-2">
+            <Button variant="secondary" onClick={handleExportCsv} disabled={controller.properties.length === 0}><Download className="me-2 size-4" />تصدير</Button>
+            <Button onClick={controller.openCreateModal}><Plus className="me-2 size-4" />إضافة عقار</Button>
+          </div>
+          <div className="flex gap-2">
+            <input value={controller.search} onChange={(e) => { controller.setSearch(e.target.value); controller.setPage(1); }} placeholder="بحث بالاسم أو العنوان..." className="h-9 flex-1 rounded-xl border px-3 text-sm" />
+            <Select aria-label="الحالة" value={controller.status} onChange={(e) => { controller.setStatus(e.target.value as typeof controller.status); controller.setPage(1); }} className="w-36 rounded-xl"><option value="all">كل الحالات</option>{controller.statusValues.map((s) => <option key={s} value={s}>{controller.statusLabels[s]}</option>)}</Select>
+          </div>
+          <ActiveFilterBar filters={controller.activeFilters} onClearAll={controller.clearFilters} />
+          {content}
+        </div>
+        <PropertyFormModal open={controller.modalOpen} onClose={controller.closeModal} propertyId={controller.editPropertyId} />
+        <ConfirmDialog open={Boolean(controller.archiveTarget)} onOpenChange={(o) => { if (!o) controller.cancelArchive(); }} title={`أرشفة العقار "${controller.archiveTarget?.title ?? ""}"؟`} description="سيتم إخفاء العقار من القوائم النشطة." confirmLabel="أرشفة" isLoading={controller.isArchiving} onConfirm={controller.confirmArchive} />
+      </>
+    );
+  }
 
   return (
     <>
-      <ListPage
-        embedded={embedded}
-        dir="rtl"
-        visualVariant="malek-pro"
+      <EnterprisePage
         title="سجل العقارات والوحدات"
         description="العقار — المالك — الوحدات — المستأجر"
-        count={controller.totalCount}
-        primaryAction={
-          <Button onClick={controller.openCreateModal}>
-            <Plus className="me-2 size-4" />
-            إضافة عقار
-          </Button>
-        }
-        secondaryActions={
-          <div className="flex items-center gap-2">
-            <ViewModeToggle value={viewMode} onChange={setViewMode} />
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleExportCsv}
-              disabled={controller.properties.length === 0}
-              aria-label="تصدير العقارات كملف CSV"
-            >
-              <Download className="me-2 size-4" />
-              تصدير CSV
-            </Button>
+        actions={<><Button variant="secondary" onClick={handleExportCsv} disabled={controller.properties.length === 0}><Download className="me-2 size-4" />تصدير</Button><Button onClick={controller.openCreateModal}><Plus className="me-2 size-4" />إضافة عقار</Button></>}
+        toolbar={
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <input value={controller.search} onChange={(e) => { controller.setSearch(e.target.value); controller.setPage(1); }} placeholder="بحث بالاسم أو العنوان..." className="h-9 w-full sm:max-w-xs rounded-xl border px-3 text-sm" />
+            <div className="flex items-center gap-2">
+              <Select aria-label="الحالة" value={controller.status} onChange={(e) => { controller.setStatus(e.target.value as typeof controller.status); controller.setPage(1); }} className="w-36 rounded-xl"><option value="all">كل الحالات</option>{controller.statusValues.map((s) => <option key={s} value={s}>{controller.statusLabels[s]}</option>)}</Select>
+              <ActiveFilterBar filters={controller.activeFilters} onClearAll={controller.clearFilters} />
+            </div>
           </div>
         }
-        search={{
-          value: controller.search,
-          onChange: (value) => {
-            controller.setSearch(value);
-            controller.setPage(1);
-          },
-          placeholder: "بحث بالاسم أو العنوان...",
-        }}
-        filters={
-          <div className="space-y-2">
-            <Select
-              aria-label="الحالة"
-              value={controller.status}
-              onChange={(event) => {
-                controller.setStatus(event.target.value as typeof controller.status);
-                controller.setPage(1);
-              }}
-              className="w-full rounded-xl sm:w-36"
-            >
-              <option value="all">كل الحالات</option>
-              {controller.statusValues.map((status) => (
-                <option key={status} value={status}>
-                  {controller.statusLabels[status]}
-                </option>
-              ))}
-            </Select>
-            <ActiveFilterBar
-              filters={controller.activeFilters}
-              onClearAll={controller.clearFilters}
-            />
-          </div>
-        }
+        maxWidth="full"
       >
-        {!controller.propertiesQuery.isLoading && !controller.propertiesQuery.isError ? (
-          <section
-            data-property-summary
-            aria-label="ملخص جاهزية العقارات"
-            className="grid gap-3 lg:grid-cols-[minmax(17rem,1.05fr)_minmax(0,2fr)]"
-          >
-            <OperationalCommandPanel
-              label="جاهزية التشغيل"
-              value={`${formatCount(readinessRate)}%`}
-              icon={CircleCheck}
-              progress={readinessRate}
-              footer={(
-                <>
-                  <span>{formatCount(readyCount)} جاهزة</span>
-                  <span>{formatCount(attentionCount)} تحتاج متابعة</span>
-                </>
-              )}
-            />
-
-            <div className="grid gap-3 sm:grid-cols-3">
-              <OperationalMetricCard
-                label="إجمالي العقارات"
-                value={formatCount(controller.totalCount)}
-                hint="كل النتائج المطابقة"
-                icon={Building2}
-              />
-              <OperationalMetricCard
-                label="مرتبطة بمالك"
-                value={formatCount(linkedOwnerCount)}
-                hint="ضمن الصفحة الحالية"
-                icon={Handshake}
-              />
-              <OperationalMetricCard
-                label="تحتاج متابعة"
-                value={formatCount(attentionCount)}
-                hint="مالك أو اتفاقية تشغيل"
-                icon={TriangleAlert}
-              />
-            </div>
-          </section>
-        ) : null}
-
-        <section
-          data-property-register
-          className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-card"
-        >
-          <header className="flex flex-col gap-3 border-b border-border/70 bg-muted/35 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="grid size-9 place-items-center rounded-xl bg-primary/9 text-primary">
-                  <Building2 className="size-4.5" aria-hidden="true" />
-                </span>
-                <h2 className="text-base font-black">سجل العقارات</h2>
-              </div>
-              <p className="mt-1.5 text-xs font-medium text-muted-foreground">
-                {formatCount(controller.properties.length)} عقار في الصفحة الحالية.
-              </p>
-            </div>
-            {attentionCount > 0 ? (
-              <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-warning/20 bg-warning-bg px-3 py-1.5 text-xs font-black text-warning">
-                <TriangleAlert className="size-3.5" aria-hidden="true" />
-                {formatCount(attentionCount)} تحتاج متابعة
-              </span>
-            ) : null}
-          </header>
-
-          <div className="p-3 sm:p-4">
-            <AsyncContentState
-              status={
-                controller.propertiesQuery.isLoading
-                  ? "loading"
-                  : controller.propertiesQuery.isError
-                    ? "error"
-                    : controller.properties.length === 0
-                      ? "empty"
-                      : "ready"
-              }
-              error={controller.propertiesQuery.error}
-              errorTitle="تعذر تحميل قائمة العقارات"
-              errorAction={
-                <Button onClick={() => controller.propertiesQuery.refetch()}>
-                  إعادة المحاولة
-                </Button>
-              }
-              emptyTitle={
-                controller.hasFilterValues
-                  ? "لا توجد نتائج مطابقة للبحث"
-                  : "لم تُضف عقارات بعد"
-              }
-              emptyDescription={
-                controller.hasFilterValues
-                  ? "جرّب تغيير عوامل البحث أو إزالة الفلتر."
-                  : "ابدأ بإضافة أول عقار لك."
-              }
-              emptyAction={
-                !controller.hasFilterValues ? (
-                  <Button onClick={controller.openCreateModal}>
-                    <Building2 className="me-2 size-4" />
-                    إضافة أول عقار
-                  </Button>
-                ) : undefined
-              }
-            >
-              {viewMode === "list" ? (
-                <DataTable
-                  aria-label="جدول العقارات"
-                  enableViewModeToggle={false}
-                  rows={controller.properties}
-                  keyOf={(property) => property.id}
-                  onRowClick={(property) => controller.navigateToProperty(property.id)}
-                  columns={[
-                    {
-                      key: "title",
-                      header: "العقار",
-                      render: (property) => (
-                        <EntityCell icon={Building2} title={property.title ?? "—"} />
-                      ),
-                    },
-                    {
-                      key: "status",
-                      header: "الحالة",
-                      render: (property) => (
-                        <StatusBadge
-                          tone={
-                            propertyStatusTone[
-                              property.status as keyof typeof propertyStatusTone
-                            ] ?? "gray"
-                          }
-                        >
-                          {controller.statusLabels[
-                            property.status as keyof typeof controller.statusLabels
-                          ] ?? property.status}
-                        </StatusBadge>
-                      ),
-                    },
-                    {
-                      key: "workflow",
-                      header: "المالك والتشغيل",
-                      render: (property) => <PropertyWorkflowStatus property={property} />,
-                    },
-                    {
-                      key: "address",
-                      header: "العنوان",
-                      render: (property) => (
-                        <span className="text-sm text-muted-foreground">
-                          {property.address ?? "—"}
-                        </span>
-                      ),
-                    },
-                    {
-                      key: "actions",
-                      header: "إجراءات",
-                      render: (property) => (
-                        <div
-                          className="flex"
-                          onClick={(event) => event.stopPropagation()}
-                          onKeyDown={(event) => event.stopPropagation()}
-                        >
-                          <ActionMenu
-                            label="إجراءات العقار"
-                            items={[
-                              {
-                                id: "edit",
-                                label: "تعديل",
-                                icon: Edit,
-                                onClick: () => controller.openEditModal(property.id),
-                              },
-                              {
-                                id: "archive",
-                                label: "أرشفة",
-                                icon: Trash2,
-                                variant: "destructive",
-                                onClick: () => controller.requestArchive(
-                                  property.id,
-                                  property.title ?? "عقار",
-                                ),
-                              },
-                            ]}
-                          />
-                        </div>
-                      ),
-                    },
-                  ]}
-                  renderMobileCard={(property) => (
-                    <MobileCard
-                      title={property.title ?? "عقار"}
-                      subtitle={property.address ?? "العنوان غير محدد"}
-                      badge={
-                        <StatusBadge
-                          tone={
-                            propertyStatusTone[
-                              property.status as keyof typeof propertyStatusTone
-                            ] ?? "gray"
-                          }
-                          dot
-                        >
-                          {controller.statusLabels[
-                            property.status as keyof typeof controller.statusLabels
-                          ] ?? property.status}
-                        </StatusBadge>
-                      }
-                      stats={<PropertyWorkflowStatus property={property} />}
-                      onClick={() => controller.navigateToProperty(property.id)}
-                      actions={
-                        <div className="grid w-full grid-cols-2 gap-2">
-                          <Button
-                            variant="secondary"
-                            className="min-h-11 gap-1 text-xs"
-                            onClick={() => controller.openEditModal(property.id)}
-                          >
-                            <Edit className="size-3.5" />
-                            تعديل
-                          </Button>
-                          <Button
-                            variant="danger"
-                            className="min-h-11 gap-1 text-xs"
-                            onClick={() => controller.requestArchive(
-                              property.id,
-                              property.title ?? "عقار",
-                            )}
-                          >
-                            <Trash2 className="size-3.5" />
-                            أرشفة
-                          </Button>
-                        </div>
-                      }
-                    />
-                  )}
-                />
-              ) : (
-                <ResponsiveCardGrid desktopColumns={3} gap="lg">
-                  {controller.properties.map((property) => (
-                    <EntityCard
-                      key={property.id}
-                      id={property.id}
-                      name={property.title ?? "عقار"}
-                      subtitle={property.address ?? "العنوان غير محدد"}
-                      avatarIcon={Building2}
-                      badge={
-                        <StatusBadge
-                          tone={
-                            propertyStatusTone[
-                              property.status as keyof typeof propertyStatusTone
-                            ] ?? "gray"
-                          }
-                        >
-                          {controller.statusLabels[
-                            property.status as keyof typeof controller.statusLabels
-                          ] ?? property.status}
-                        </StatusBadge>
-                      }
-                      meta={[
-                        {
-                          icon: MapPin,
-                          value: property.address ?? "العنوان غير محدد",
-                        },
-                        {
-                          icon: Handshake,
-                          value: property.workflow_health === "owner_unavailable"
-                            ? property.current_owner_name
-                              ? `المالك المرتبط غير نشط: ${property.current_owner_name}`
-                              : "سجل المالك المرتبط غير متاح"
-                            : property.current_owner_name
-                              ? `المالك: ${property.current_owner_name}`
-                              : "لا يوجد ربط ملكية ساري",
-                        },
-                        {
-                          icon: Building2,
-                          value: property.workflow_health === "ready"
-                            ? "جاهز للتشغيل"
-                            : property.workflow_health === "missing_owner"
-                              ? "يحتاج ربط مالك"
-                              : property.workflow_health === "owner_unavailable"
-                                ? "راجع حالة المالك المرتبط"
-                                : "يحتاج اتفاقية تشغيل",
-                        },
-                      ]}
-                      onClick={() => controller.navigateToProperty(property.id)}
-                      actions={[
-                        {
-                          label: "تعديل",
-                          icon: Edit,
-                          onClick: () => controller.openEditModal(property.id),
-                        },
-                        {
-                          label: "أرشفة",
-                          icon: Trash2,
-                          variant: "danger",
-                          onClick: () => controller.requestArchive(
-                            property.id,
-                            property.title ?? "عقار",
-                          ),
-                        },
-                      ]}
-                    />
-                  ))}
-                </ResponsiveCardGrid>
-              )}
-            </AsyncContentState>
-          </div>
-        </section>
-
-        {!controller.propertiesQuery.isLoading &&
-          !controller.propertiesQuery.isError &&
-          controller.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-border/70 bg-card px-3 py-2.5 shadow-card">
-              <Button
-                variant="secondary"
-                className="rounded-xl"
-                disabled={controller.page <= 1}
-                onClick={() => controller.setPage((page) => Math.max(1, page - 1))}
-              >
-                السابق
-              </Button>
-              <span className="text-sm font-bold text-muted-foreground">
-                {controller.page} / {controller.totalPages}
-              </span>
-              <Button
-                variant="secondary"
-                className="rounded-xl"
-                disabled={controller.page >= controller.totalPages}
-                onClick={() => controller.setPage((page) => Math.min(controller.totalPages, page + 1))}
-              >
-                التالي
-              </Button>
-            </div>
-          )}
-      </ListPage>
-
-      <PropertyFormModal
-        open={controller.modalOpen}
-        onClose={controller.closeModal}
-        propertyId={controller.editPropertyId}
-      />
-
-      <ConfirmDialog
-        open={Boolean(controller.archiveTarget)}
-        onOpenChange={(open) => {
-          if (!open) controller.cancelArchive();
-        }}
-        title={`أرشفة العقار "${controller.archiveTarget?.title ?? ""}"؟`}
-        description="سيتم إخفاء العقار من القوائم النشطة. يمكن التراجع عن هذا لاحقاً من سجل الأرشيف."
-        confirmLabel="أرشفة"
-        children={(
-          <ul className="mt-1 space-y-1.5 text-xs leading-5 text-muted-foreground">
-            <li className="flex gap-1.5"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden="true" />لا يمكن أرشفة عقار يحتوي وحدات غير مؤرشفة — أرشِف الوحدات أولاً.</li>
-            <li className="flex gap-1.5"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden="true" />العقار المرتبط باتفاقية مالك محفوظة لا يُؤرشف؛ استخدم حالة «غير نشط» أو «مباع» للحفاظ على السجل.</li>
-            <li className="flex gap-1.5"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden="true" />لا يمكن الأرشفة مع طلب صيانة مفتوح أو قيد التنفيذ.</li>
-            <li className="flex gap-1.5"><span className="mt-1.5 size-1 shrink-0 rounded-full bg-muted-foreground/40" aria-hidden="true" />لا يمكن أرشفة عقار عليه عقود نشطة.</li>
-          </ul>
-        )}
-        isLoading={controller.isArchiving}
-        onConfirm={controller.confirmArchive}
-      />
+        {content}
+      </EnterprisePage>
+      <PropertyFormModal open={controller.modalOpen} onClose={controller.closeModal} propertyId={controller.editPropertyId} />
+      <ConfirmDialog open={Boolean(controller.archiveTarget)} onOpenChange={(o) => { if (!o) controller.cancelArchive(); }} title={`أرشفة العقار "${controller.archiveTarget?.title ?? ""}"؟`} description="سيتم إخفاء العقار من القوائم النشطة." confirmLabel="أرشفة" isLoading={controller.isArchiving} onConfirm={controller.confirmArchive} />
     </>
   );
 }
 
-export function PropertiesWorkspace({ embedded = true }: PropertiesListPageProps) {
-  return <PropertiesListPage embedded={embedded} />;
-}
+export function PropertiesWorkspace({ embedded = true }: PropertiesListPageProps) { return <PropertiesListPage embedded={embedded} />; }
