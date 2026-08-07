@@ -1,8 +1,8 @@
 import { AlertCircle, Clock, Flame, PlusCircle, Printer, Wrench } from 'lucide-react';
 import { useMemo } from 'react';
 import { AsyncContentState } from '@/components/async-content-state';
-import { PageHeader } from '@/components/layout/page-header';
-import { PageLayout } from '@/components/layout/page-layout';
+import { EnterprisePage } from '@/components/enterprise/enterprise-page';
+import { EnterpriseStats } from '@/components/enterprise/enterprise-stats';
 import { ActiveFilterBar, type ActiveFilterItem } from '@/components/ui/active-filter-bar';
 import { Button } from '@/components/ui/button';
 import { FilterBar } from '@/components/ui/filter-bar';
@@ -24,36 +24,7 @@ function formatCount(value: number) {
   return new Intl.NumberFormat('en-US').format(value);
 }
 
-function MaintenanceMetric({
-  label,
-  value,
-  hint,
-  icon: Icon,
-}: Readonly<{
-  label: string;
-  value: number;
-  hint: string;
-  icon: typeof Wrench;
-}>) {
-  return (
-    <article className="group relative overflow-hidden rounded-2xl border border-border/75 bg-card p-4 shadow-card">
-      <div
-        className="absolute inset-inline-end-0 inset-block-start-0 size-24 rounded-full bg-primary/7 blur-2xl transition-colors group-hover:bg-primary/12"
-        aria-hidden="true"
-      />
-      <div className="relative flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold text-muted-foreground">{label}</p>
-          <p className="mt-2 text-2xl font-black tabular-nums">{formatCount(value)}</p>
-          <p className="mt-1 text-[11px] font-medium text-muted-foreground">{hint}</p>
-        </div>
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/15 bg-primary/8 text-primary">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-      </div>
-    </article>
-  );
-}
+
 
 export type MaintenanceWorkspaceMode = 'standalone' | 'embedded';
 
@@ -181,59 +152,14 @@ export function MaintenanceWorkspace({ mode = 'standalone' }: MaintenanceWorkspa
         <DocumentReadinessNotice />
       ) : null}
 
-      <section
-        data-maintenance-summary
-        aria-label="ملخص تشغيل الصيانة"
-        className="grid gap-3 lg:grid-cols-[minmax(17rem,1.05fr)_minmax(0,2fr)]"
-      >
-        <article className="relative overflow-hidden rounded-2xl border border-sidebar-border bg-sidebar p-5 text-sidebar-foreground shadow-elevated">
-          <div
-            className="absolute -inset-inline-end-12 -inset-block-start-16 size-48 rounded-full bg-destructive/20 blur-3xl"
-            aria-hidden="true"
-          />
-          <div className="relative">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold text-sidebar-foreground/65">طلبات تحتاج انتباهًا فوريًا</p>
-                <p className="mt-2 text-4xl font-black tabular-nums">
-                  {controller.isLoading ? '—' : formatCount(controller.maintenanceSummary.urgent)}
-                </p>
-              </div>
-              <span className="grid size-12 place-items-center rounded-2xl border border-sidebar-border bg-sidebar-accent text-warning">
-                <Flame className="size-6" aria-hidden="true" />
-              </span>
-            </div>
-            <p className="mt-4 text-xs font-medium leading-5 text-sidebar-foreground/72">
-              أولوية عاجلة ضمن الفلاتر الحالية. افتح الطلب لتحديد المسؤول أو بدء التنفيذ.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-sidebar-foreground/72">
-              <span>{formatCount(controller.maintenanceSummary.open)} مفتوحة</span>
-              <span>{formatCount(controller.maintenanceSummary.inProgress)} قيد التنفيذ</span>
-            </div>
-          </div>
-        </article>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <MaintenanceMetric
-            label="إجمالي الطلبات"
-            value={controller.maintenanceSummary.total}
-            hint="ضمن الفلاتر الحالية"
-            icon={Wrench}
-          />
-          <MaintenanceMetric
-            label="طلبات مفتوحة"
-            value={controller.maintenanceSummary.open}
-            hint="تحتاج إلى بدء المتابعة"
-            icon={AlertCircle}
-          />
-          <MaintenanceMetric
-            label="قيد التنفيذ"
-            value={controller.maintenanceSummary.inProgress}
-            hint="يعمل عليها الفريق"
-            icon={Clock}
-          />
-        </div>
-      </section>
+      <EnterpriseStats
+        items={[
+          { key: "urgent", label: "عاجلة", value: formatCount(controller.maintenanceSummary.urgent), icon: Flame },
+          { key: "total", label: "الإجمالي", value: formatCount(controller.maintenanceSummary.total), icon: Wrench },
+          { key: "open", label: "مفتوحة", value: formatCount(controller.maintenanceSummary.open), icon: AlertCircle },
+          { key: "progress", label: "قيد التنفيذ", value: formatCount(controller.maintenanceSummary.inProgress), icon: Clock },
+        ]}
+      />
 
       <FilterBar
         filters={(
@@ -389,15 +315,13 @@ export function MaintenanceWorkspace({ mode = 'standalone' }: MaintenanceWorkspa
   }
 
   return (
-    <PageLayout dir="rtl" size="wide" visualVariant="malek-pro">
-      <PageHeader
+    <EnterprisePage
         title="طلبات الصيانة"
-        description="غرفة متابعة للطلبات العاجلة والمفتوحة وقيد التنفيذ مع الإجراءات والطباعة من مكان واحد."
-        count={controller.filteredMaintenanceRows.length}
-        primaryAction={createAction}
-        secondaryActions={printAction}
-      />
+        description="الصيانة — الأولوية — الحالة — التكلفة"
+        actions={<>{printAction}{createAction}</>}
+        maxWidth="full"
+      >
       {body}
-    </PageLayout>
+    </EnterprisePage>
   );
 }

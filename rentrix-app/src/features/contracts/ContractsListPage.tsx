@@ -5,7 +5,7 @@ import { ContractKpiGrid } from './components/ContractKpiGrid';
 import { ContractResults } from './components/ContractResults';
 import { ContractFormModal } from './contract-form-modal';
 import { ListControlSurface } from '@/components/layout/list-controls';
-import { EmbeddableWorkspace } from '@/components/layout/embeddable-workspace';
+import { EnterprisePage } from '@/components/enterprise/enterprise-page';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { buildContractsCsvBlob, buildContractsCsvFilename } from './contractListExport';
@@ -90,28 +90,8 @@ export function ContractsListPage({ embedded = false }: ContractsListPageProps) 
     }
   };
 
-  return (
+  const pageContent = (
     <>
-      <EmbeddableWorkspace
-        embedded={embedded}
-        dir="rtl"
-        size="wide"
-        visualVariant="malek-pro"
-        title="العقود"
-        description="العقد — المستأجر — الوحدة — المدة — الإيجار"
-        count={hasClientFilter ? filteredContracts.length : (contractsQuery.data?.count ?? filteredContracts.length)}
-        primaryAction={
-          <Button onClick={openCreate}>
-            <Plus className="me-2 size-4" />إنشاء عقد
-          </Button>
-        }
-        secondaryActions={
-          <Button variant="secondary" onClick={() => exportContractsCsv(filteredContracts)} disabled={!filteredContracts.length} aria-label="تصدير العقود كملف CSV">
-            <Download className="me-2 size-4" />تصدير CSV
-          </Button>
-        }
-      >
-
         <ContractKpiGrid companySettings={companySettings} contracts={contracts} filteredContracts={filteredContracts} totalCount={contractsQuery.data?.count ?? contracts.length} />
 
         <ListControlSurface>
@@ -148,7 +128,35 @@ export function ContractsListPage({ embedded = false }: ContractsListPageProps) 
           } : undefined}
           setExpandedId={setExpandedId}
         />
-      </EmbeddableWorkspace>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <>
+        <div className="space-y-4">
+          <div className="flex justify-end gap-2">
+            <Button variant="secondary" onClick={() => exportContractsCsv(filteredContracts)} disabled={!filteredContracts.length}><Download className="me-2 size-4" />تصدير</Button>
+            <Button onClick={openCreate}><Plus className="me-2 size-4" />إنشاء عقد</Button>
+          </div>
+          {pageContent}
+        </div>
+        <ContractFormModal open={modalOpen} onClose={closeModal} contractId={editContractId} />
+        <ConfirmDialog open={Boolean(deleteId)} onOpenChange={(open) => { if (!open) setDeleteId(null); }} title="أرشفة العقد؟" description="سيتم أرشفة العقد وإخفاؤه من القائمة النشطة مع الاحتفاظ بسجله المحاسبي." confirmLabel="تأكيد الأرشفة" isLoading={deleteMutation.isPending} onConfirm={confirmDelete} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <EnterprisePage
+        title="سجل العقود والالتزامات"
+        description="العقد — المستأجر — الوحدة — المدة — الإيجار"
+        actions={<><Button variant="secondary" onClick={() => exportContractsCsv(filteredContracts)} disabled={!filteredContracts.length}><Download className="me-2 size-4" />تصدير</Button><Button onClick={openCreate}><Plus className="me-2 size-4" />إنشاء عقد</Button></>}
+        maxWidth="full"
+      >
+        {pageContent}
+      </EnterprisePage>
 
       <ContractFormModal open={modalOpen} onClose={closeModal} contractId={editContractId} />
 
