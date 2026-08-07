@@ -167,5 +167,7 @@ export {
 } from './hooks/use-keyboard-shortcuts';
 export { useUnsavedDismiss, type UseUnsavedDismissResult } from './hooks/use-unsaved-dismiss';
 
+export { UnifiedListShell, type UnifiedListShellProps } from './unified-list-shell';
+
 // Drawer-mode union lives with useDrawer; re-exported here for parity with the hook.
 export { enterpriseDrawerModes } from './hooks/use-drawer';

@@ -114,7 +114,7 @@ export function ContractsListE2EFixture() {
       <PageLayout dir="rtl" size="wide" visualVariant="malek-pro">
         <PageHeader
           title="العقود"
-          description="إدارة دورة العقد من مسودة إلى نشط ثم منتهي أو ملغي."
+          description="العقد — المستأجر — الوحدة — المدة — الإيجار"
           count={filteredContracts.length}
           primaryAction={
             <Button onClick={() => undefined}>

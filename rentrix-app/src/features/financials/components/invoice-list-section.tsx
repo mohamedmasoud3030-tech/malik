@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, HandCoins, Printer, ReceiptText } from 'lucide-react';
+import { Download, HandCoins, Printer } from 'lucide-react';
 import { EntityTable } from '@/components/ui/entity-table';
 import { MobileCard } from '@/components/ui/mobile-card';
 import { getSafeRemainingAmount } from '../financialMath';
@@ -100,21 +100,8 @@ export function InvoiceListSection({
   const totalPages = pageSize > 0 ? Math.max(1, Math.ceil(total / pageSize)) : 1;
 
   return (
-    <Card className="overflow-hidden" data-component-card>
-      <CardHeader className="border-b border-border/60 bg-muted/20 pb-4" data-finance-header>
-        <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-2xl bg-primary/10 text-primary">
-            <ReceiptText className="size-5" aria-hidden="true" />
-          </span>
-          <div>
-            <CardTitle className="text-sm font-bold">الفواتير</CardTitle>
-            <p className="mt-1 text-xs font-medium text-muted-foreground">
-              عرض واضح للمستحق والمدفوع والمتبقي — مع الحفاظ على الفترة والعقار والمستأجر.
-            </p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-5 p-3 sm:p-5">
+    <div className="space-y-4" data-component-card>
+      <CardContent className="space-y-4 p-0">
         {/* 3. Summary KPIs with drill-down preserving filters */}
         <FinanceSection ariaLabel="ملخص الفواتير">
           <InvoiceSummaryCards
@@ -386,6 +373,6 @@ export function InvoiceListSection({
           </FinanceCluster>
         </FinanceSection>
       </CardContent>
-    </Card>
+    </div>
   );
 }
