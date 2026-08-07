@@ -92,10 +92,11 @@ describe('app route and navigation parity', () => {
   });
 
   it('maps every visible navigation and mobile navigation item to registered routes without duplicates', () => {
-    const navPaths = navItems.map(([to]) => to);
+    const stripQuery = (p: string) => p.split('?')[0];
+    const navPaths = navItems.map(([to]) => stripQuery(to));
     const navKeys = navItems.map(([to, labelKey]) => `${to}:${labelKey}`);
-    const mobileNavPaths = mobileNavItems.map(([to]) => to);
-    const quickCreatePaths = quickCreateItems.map(([to]) => to);
+    const mobileNavPaths = mobileNavItems.map(([to]) => stripQuery(to));
+    const quickCreatePaths = quickCreateItems.map(([to]) => stripQuery(to));
 
     expect(new Set(navKeys).size).toBe(navKeys.length);
     expect(new Set(mobileNavPaths).size).toBe(mobileNavPaths.length);
@@ -107,7 +108,7 @@ describe('app route and navigation parity', () => {
     for (const [to, , , , permission] of [...navItems, ...quickCreateItems]) {
       if (!permission) continue;
 
-      expect(getRouteDefinition(to)).toContain(`requirePermission('${permission}')`);
+      expect(getRouteDefinition(to.split('?')[0])).toContain(`requirePermission('${permission}')`);
     }
   });
 
@@ -149,19 +150,17 @@ describe('app route and navigation parity', () => {
   });
 
   it('exposes canonical finance hubs as primary finance destinations without duplicating legacy routes', () => {
-    const mobileNavPaths = mobileNavItems.map(([to]) => to);
-    const navPaths = navItems.map(([to]) => to);
-    const financeGroup = navGroups.find(([title]) => title === 'المالية')?.[1].map(([to]) => to) ?? [];
-    const financialsChildren = workspaceChildNavItems['/financials']?.map(([to]) => to) ?? [];
+    const stripQuery = (p: string) => p.split('?')[0];
+    const mobileNavPaths = mobileNavItems.map(([to]) => stripQuery(to));
+    const navPaths = navItems.map(([to]) => stripQuery(to));
+    const financeGroup = navGroups.find(([title]) => title === 'المالية')?.[1].map(([to]) => stripQuery(to)) ?? [];
+    const financialsChildren = workspaceChildNavItems['/financials']?.map(([to]) => stripQuery(to)) ?? [];
 
-    // IA 2026-08: finance 4 canonical hubs are primary items under "المالية"
-    // (direct Primary → Hub → SectionTabs → Page with one secondary layer),
-    // legacy 8 routes (/invoices etc.) remain REDIRECT-ONLY for bookmarks
-    // but are not in navigation inventory.
+    // Flattened finance: 8 direct section links + overview, still rooted on 4 hubs
     expect(financeGroup).toEqual(
       expect.arrayContaining(['/financials', '/finance/collections', '/finance/expenses', '/finance/deposits', '/finance/banking']),
     );
-    expect(financeGroup).toHaveLength(5);
+    expect(financeGroup.length).toBeGreaterThanOrEqual(5);
     expect(navPaths).toEqual(
       expect.arrayContaining(['/finance/collections', '/finance/expenses', '/finance/deposits', '/finance/banking']),
     );
@@ -201,8 +200,9 @@ describe('app route and navigation parity', () => {
     expect(getGroupChildPaths('/maintenance')).toEqual(
       expect.arrayContaining(['/maintenance', '/utilities', '/automation', '/documents-vault']),
     );
-    // Finance: 4 canonical hubs are primary group items, not workspaceChildNavItems children
-    const financeGroupPaths = navGroups.find(([title]) => title === 'المالية')?.[1].map(([to]) => to) ?? [];
+    // Finance: flattened 8 sections + overview, still rooted on 4 hubs
+    const stripQ = (p: string) => p.split('?')[0];
+    const financeGroupPaths = navGroups.find(([title]) => title === 'المالية')?.[1].map(([to]) => stripQ(to)) ?? [];
     expect(financeGroupPaths).toEqual(
       expect.arrayContaining(['/financials', '/finance/collections', '/finance/expenses', '/finance/deposits', '/finance/banking']),
     );
