@@ -40,13 +40,13 @@ export function PageHeader({
   return (
     <header
       data-page-header
-      className={cn('border-b border-border/60 pb-3 sm:pb-4', className)}
+      className={cn('pb-2 sm:pb-3', className)}
     >
       <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-4">
-        {/* Title + description */}
+        {/* Title + description — compact, no marketing border */}
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <h1 className="min-w-0 text-balance text-xl font-bold tracking-tight sm:text-2xl">{title}</h1>
+            <h1 className="min-w-0 text-balance text-lg font-bold tracking-tight sm:text-xl">{title}</h1>
             {count !== undefined ? (
               <span
                 className="inline-flex min-h-5 items-center rounded-md border border-border bg-muted/50 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-muted-foreground"
@@ -57,7 +57,7 @@ export function PageHeader({
             ) : null}
           </div>
           {description ? (
-            <p className="mt-0.5 max-w-3xl text-[0.8125rem] leading-5 text-muted-foreground sm:mt-1 sm:text-sm sm:leading-6">
+            <p className="mt-0.5 max-w-2xl truncate text-xs leading-4 text-muted-foreground sm:text-[13px]">
               {description}
             </p>
           ) : null}

@@ -206,7 +206,7 @@ export function EnterpriseDataTable<T>({
   rowActions,
   rowActionsLabel,
   renderMobileCard,
-  density = 'default',
+  density = 'compact',
   stickyHeader = true,
   maxHeightClassName = 'max-h-[70vh]',
   className,

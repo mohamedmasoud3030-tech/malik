@@ -105,20 +105,21 @@ export function EnterpriseModal({
               if (warnOnUnsavedChanges && isDirty && closeOnOutsideClick) dismiss.requestClose();
             }
           }}
-          className={cn('gap-0 p-0', sizeClasses[size], className)}
+          className={cn('gap-0 p-0 overflow-hidden rounded-2xl sm:rounded-3xl', sizeClasses[size], className)}
           data-enterprise-modal
         >
-          <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6">
+          {/* Unified dark header — same for every form (property/contract/invoice/receipt/maintenance) */}
+          <div className="flex items-start justify-between gap-3 bg-slate-900 px-5 py-4 text-white sm:px-6 sm:py-5">
             <div className="flex min-w-0 items-start gap-3">
               {Icon ? (
-                <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary" aria-hidden="true">
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-white/10 text-white" aria-hidden="true">
                   <Icon className="size-5" />
                 </span>
               ) : null}
               <div className="min-w-0">
-                <DialogTitle className="text-base font-bold">{title}</DialogTitle>
+                <DialogTitle className="text-[15px] font-bold leading-6 text-white sm:text-base">{title}</DialogTitle>
                 {description ? (
-                  <DialogDescription className="mt-1 text-xs font-medium text-muted-foreground">
+                  <DialogDescription className="mt-0.5 text-xs font-medium leading-4 text-white/70">
                     {description}
                   </DialogDescription>
                 ) : (
@@ -129,7 +130,7 @@ export function EnterpriseModal({
             <Button
               variant="ghost"
               size="icon"
-              className="size-10 shrink-0"
+              className="size-9 shrink-0 rounded-xl bg-white/10 text-white hover:bg-white/15 hover:text-white"
               onClick={dismiss.requestClose}
               aria-label="إغلاق"
             >
