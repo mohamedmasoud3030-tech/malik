@@ -642,7 +642,7 @@ export function UtilitiesWorkspace({ mode = 'standalone' }: UtilitiesWorkspacePr
     <PageLayout dir="rtl" lang="ar" size="wide">
       <PageHeader
         title="إدارة المرافق والعدادات"
-        description="إدارة حقيقية لعدادات الكهرباء والمياه والخدمات مع ربط العقار والوحدة وتسجيل القراءات والفواتير."
+        description="العداد — القراءة — الفاتورة — الاستهلاك"
         primaryAction={headerActions}
       />
       {body}

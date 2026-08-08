@@ -137,7 +137,7 @@ export function LandsView(props: Props) {
       lang="ar"
       className="space-y-4"
       title="قطع الأراضي التشغيلية"
-      description="إدارة الأراضي ومتابعة حالتها ومساحاتها وقيمها التشغيلية."
+      description="الأرض — المساحة — القيمة — الحالة"
       count={isLoading ? "..." : rows.length}
       secondaryActions={
         <div className="hidden min-w-max items-center gap-2 rounded-xl border bg-background/70 px-3 py-2 text-xs font-bold text-muted-foreground sm:flex">

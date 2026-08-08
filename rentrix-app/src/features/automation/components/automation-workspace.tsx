@@ -28,7 +28,7 @@ export function AutomationWorkspace({ mode = 'standalone' }: AutomationWorkspace
     <PageLayout dir="rtl" lang="ar">
       <PageHeader
         title="مركز الأتمتة"
-        description="إدارة تذكيرات انتهاء العقود، استحقاق الإيجار، تقارير الملاك، وتنبيهات الصيانة من مكان واحد."
+        description="الأتمتة — التذكير — الاستحقاق — التنبيه"
       />
       <AutomationCenterView />
     </PageLayout>

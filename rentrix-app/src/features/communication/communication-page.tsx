@@ -109,7 +109,7 @@ export function CommunicationWorkspace({ embedded = false }: CommunicationWorksp
     <PageLayout dir="rtl" lang="ar">
       <PageHeader
         title="مركز التواصل"
-        description="سجل تشغيلي للتواصل مع الأطراف، مع واجهة قوالب وواتساب وبريد قابلة للتوسعة دون ربط مزود خارجي داخل الواجهة."
+        description="التواصل — القالب — الطرف — السجل"
         primaryAction={createAction}
       />
       {workspaceContent}
