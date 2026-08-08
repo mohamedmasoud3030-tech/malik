@@ -31,12 +31,7 @@ function formatCount(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-function PeopleMetric({
-  label,
-  value,
-  hint,
-  icon: Icon,
-}: Readonly<{
+: Readonly<{
   label: string;
   value: number;
   hint: string;
@@ -287,36 +282,16 @@ export function PeopleListPage({ embedded = false }: PeopleListPageProps) {
         }
       >
         {!peopleQuery.isLoading && !peopleQuery.isError ? (
-          <section
-            data-people-summary
-            aria-label="ملخص الأشخاص"
-            className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
-          >
-            <PeopleMetric
-              label="إجمالي السجلات"
-              value={totalCount}
-              hint="كل النتائج المطابقة"
-              icon={Users}
-            />
-            <PeopleMetric
-              label="ملاك في الصفحة"
-              value={ownersOnPage}
-              hint="من السجلات المعروضة"
-              icon={UserRound}
-            />
-            <PeopleMetric
-              label="مستأجرون في الصفحة"
-              value={tenantsOnPage}
-              hint="من السجلات المعروضة"
-              icon={UserCheck}
-            />
-            <PeopleMetric
-              label="بيانات تواصل متاحة"
-              value={completeContactsOnPage}
-              hint="هاتف أو بريد مسجل"
-              icon={IdCard}
-            />
-          </section>
+                  {!peopleQuery.isLoading && !peopleQuery.isError ? (
+          <EnterpriseStats
+            items={[
+              { key: "total", label: "الإجمالي", value: formatCount(totalCount), icon: Users },
+              { key: "owners", label: "ملاك", value: formatCount(ownersOnPage), icon: UserRound },
+              { key: "tenants", label: "مستأجرون", value: formatCount(tenantsOnPage), icon: UserCheck },
+              { key: "contacts", label: "تواصل", value: formatCount(completeContactsOnPage), icon: IdCard },
+            ]}
+          />
+        ) : null}
         ) : null}
 
         <section
