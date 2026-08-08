@@ -1,5 +1,5 @@
 import { CalendarClock, FileText, WalletCards } from 'lucide-react';
-import { OperationalCommandPanel, OperationalMetricCard } from '@/components/ui/operational-summary';
+import { EnterpriseStats } from '@/components/enterprise/enterprise-stats';
 import type { CompanySettingsContract } from '@/lib/companySettings';
 import { isContractStatus } from '@/lib/contractStatus';
 import { formatContractMoney } from '../contractDisplayFormatters';
@@ -40,44 +40,13 @@ export function ContractKpiGrid({
     : 0;
 
   return (
-    <section
-      data-contract-summary
-      aria-label="ملخص دورة العقود"
-      className="grid gap-3 lg:grid-cols-[minmax(17rem,1.05fr)_minmax(0,2fr)]"
-    >
-      <OperationalCommandPanel
-        label="العقود النشطة في الصفحة"
-        value={`${formatCount(activeRate)}%`}
-        icon={WalletCards}
-        progress={activeRate}
-        footer={(
-          <>
-            <span>{formatCount(listSummary.active)} نشطة</span>
-            <span>{formatCount(listSummary.expiringSoon)} تنتهي قريبًا</span>
-          </>
-        )}
-      />
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        <OperationalMetricCard
-          label="إجمالي العقود"
-          value={formatCount(totalCount)}
-          hint="حسب فلتر الحالة الحالي"
-          icon={FileText}
-        />
-        <OperationalMetricCard
-          label="تنتهي قريبًا"
-          value={formatCount(listSummary.expiringSoon)}
-          hint="خلال 30 يومًا"
-          icon={CalendarClock}
-        />
-        <OperationalMetricCard
-          label="إيجار العقود الظاهرة"
-          value={formatContractMoney(companySettings, visibleSummary.rentTotal)}
-          hint="بعد البحث والفلاتر"
-          icon={WalletCards}
-        />
-      </div>
-    </section>
+    <EnterpriseStats
+      items={[
+        { key: "rate", label: "نشطة", value: `${formatCount(activeRate)}%`, icon: WalletCards },
+        { key: "total", label: "الإجمالي", value: formatCount(totalCount), icon: FileText },
+        { key: "expiring", label: "تنتهي قريباً", value: formatCount(listSummary.expiringSoon), icon: CalendarClock },
+        { key: "rent", label: "الإيجار", value: formatContractMoney(companySettings, visibleSummary.rentTotal), icon: WalletCards },
+      ]}
+    />
   );
 }
