@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { AlertTriangle, Edit, FileText, KeyRound, Mail, Phone, Plus, ReceiptText, ShieldCheck, TriangleAlert, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
+import { EnterpriseStats } from '@/components/enterprise/enterprise-stats';
 import { PageHeader } from '@/components/layout/page-header';
 import { PageLayout } from '@/components/layout/page-layout';
 import { AsyncContentState } from '@/components/async-content-state';
@@ -96,23 +97,13 @@ function TenantSummary({ rows, total }: Readonly<{ rows: TenantWorkspaceRow[]; t
   ];
 
   return (
-    <section data-tenant-summary aria-label="ملخص المستأجرين" className="grid gap-3 sm:grid-cols-3">
-      {items.map(({ label, value, icon: Icon, hint }) => (
-        <div key={label} className="group relative overflow-hidden rounded-2xl border border-border/75 bg-card p-4 shadow-card">
-          <div className="absolute inset-inline-end-0 inset-block-start-0 size-24 rounded-full bg-primary/7 blur-2xl transition group-hover:bg-primary/12" aria-hidden="true" />
-          <div className="relative flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-bold text-muted-foreground">{label}</p>
-              <p className="mt-2 text-2xl font-black tabular-nums">{value}</p>
-              <p className="mt-1 text-[11px] font-medium text-muted-foreground">{hint}</p>
-            </div>
-            <span className="grid size-11 place-items-center rounded-xl border border-primary/15 bg-primary/8 text-primary">
-              <Icon className="size-5" aria-hidden="true" />
-            </span>
-          </div>
-        </div>
-      ))}
-    </section>
+    <EnterpriseStats
+      items={[
+        { key: "total", label: "الإجمالي", value: formatCount(total), icon: Users },
+        { key: "active", label: "عقود نشطة", value: formatCount(activeContracts), icon: KeyRound },
+        { key: "arrears", label: "متأخرات", value: formatCount(arrearsCount), icon: AlertTriangle },
+      ]}
+    />
   );
 }
 
