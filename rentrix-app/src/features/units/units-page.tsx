@@ -13,6 +13,7 @@ import {
   getUnitPageStatus,
 } from "./use-units-list-controller";
 import { EmbeddableWorkspace } from "@/components/layout/embeddable-workspace";
+import { EnterpriseStats } from "@/components/enterprise/enterprise-stats";
 import { RouteLoadingState } from "@/components/loading-state";
 import { Button } from "@/components/ui/button";
 import { ResponsiveCardGrid } from "@/components/ui/responsive-card-grid";
@@ -34,36 +35,7 @@ const unitStatusTone = {
   reserved: "neutral",
 } as const;
 
-function UnitSummaryCard({
-  icon: Icon,
-  label,
-  value,
-  hint,
-}: Readonly<{
-  icon: typeof DoorOpen;
-  label: string;
-  value: string;
-  hint: string;
-}>) {
-  return (
-    <article className="group relative overflow-hidden rounded-2xl border border-border/75 bg-card p-4 shadow-card">
-      <div
-        className="absolute inset-inline-end-0 inset-block-start-0 size-24 rounded-full bg-primary/7 blur-2xl transition-colors group-hover:bg-primary/12"
-        aria-hidden="true"
-      />
-      <div className="relative flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-bold text-muted-foreground">{label}</p>
-          <p className="mt-2 truncate text-2xl font-black tabular-nums">{value}</p>
-          <p className="mt-1 text-[11px] font-medium text-muted-foreground">{hint}</p>
-        </div>
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/15 bg-primary/8 text-primary">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-      </div>
-    </article>
-  );
-}
+
 
 export type UnitsWorkspaceProps = Readonly<{
   embedded?: boolean;
@@ -110,66 +82,18 @@ export function UnitsWorkspace({ embedded = false }: UnitsWorkspaceProps) {
       size="wide"
       visualVariant="malek-pro"
       title="الوحدات"
-      description="متابعة الإشغال والتأجير والصيانة لكل وحدة من مساحة تشغيل واحدة."
+      description="الوحدة — العقار — الإشغال — الإيجار"
       count={formatNumber(totalUnits)}
       primaryAction={primaryAction}
     >
-      <section
-        data-unit-summary
-        aria-label="ملخص تشغيل الوحدات"
-        className="grid gap-3 lg:grid-cols-[minmax(17rem,1.1fr)_minmax(0,2fr)]"
-      >
-        <article className="relative overflow-hidden rounded-2xl border border-sidebar-border bg-sidebar p-5 text-sidebar-foreground shadow-elevated">
-          <div
-            className="absolute -inset-inline-end-12 -inset-block-start-16 size-48 rounded-full bg-primary/20 blur-3xl"
-            aria-hidden="true"
-          />
-          <div className="relative">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-bold text-sidebar-foreground/65">معدل الإشغال الحالي</p>
-                <p className="mt-2 text-4xl font-black tabular-nums">{formatNumber(occupancyRate)}%</p>
-              </div>
-              <span className="grid size-12 place-items-center rounded-2xl border border-sidebar-border bg-sidebar-accent text-sidebar-accent-foreground">
-                <CircleGauge className="size-6" aria-hidden="true" />
-              </span>
-            </div>
-            <div className="mt-5 h-2 overflow-hidden rounded-full bg-sidebar-accent">
-              <div
-                className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
-                style={{ width: `${Math.min(100, Math.max(0, occupancyRate))}%` }}
-                aria-hidden="true"
-              />
-            </div>
-            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-sidebar-foreground/72">
-              <span>{formatNumber(ctrl.kpis.occupiedCount)} مشغولة</span>
-              <span>{formatNumber(ctrl.kpis.availableCount)} متاحة</span>
-              <span>{formatNumber(maintenanceCount)} صيانة</span>
-            </div>
-          </div>
-        </article>
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <UnitSummaryCard
-            label="إجمالي الوحدات"
-            value={formatNumber(totalUnits)}
-            hint="كل الوحدات النشطة"
-            icon={DoorOpen}
-          />
-          <UnitSummaryCard
-            label="الوحدات المتاحة"
-            value={formatNumber(ctrl.kpis.availableCount)}
-            hint="جاهزة للتأجير"
-            icon={Home}
-          />
-          <UnitSummaryCard
-            label="الإيجار المتوقع"
-            value={formatMoney(ctrl.kpis.expectedRent)}
-            hint="من قيم الإيجار المسجلة"
-            icon={Building2}
-          />
-        </div>
-      </section>
+      <EnterpriseStats
+        items={[
+          { key: "rate", label: "الإشغال", value: `${formatNumber(occupancyRate)}%`, icon: CircleGauge },
+          { key: "total", label: "الإجمالي", value: formatNumber(totalUnits), icon: DoorOpen },
+          { key: "available", label: "متاحة", value: formatNumber(ctrl.kpis.availableCount), icon: Home },
+          { key: "rent", label: "الإيجار المتوقع", value: formatMoney(ctrl.kpis.expectedRent), icon: Building2 },
+        ]}
+      />
 
       <FilterBar
         searchValue={ctrl.search}
