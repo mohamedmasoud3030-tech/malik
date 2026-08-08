@@ -111,7 +111,7 @@ function TableSkeleton({
       <div className="mobile-scroll-x">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="h-9">
               {Array.from({ length: cols }, (_, i) => (
                 <TableHead key={i}>
                   <Skeleton className="h-4 w-20" />
@@ -365,7 +365,7 @@ export function EntityTable<T>({
         >
           <Table data-entity-table aria-label={ariaLabel}>
             <TableHeader>
-              <TableRow>
+              <TableRow className="h-9">
                 {hasExpansion && <TableHead className="w-12" />}
                 {columns.map((col) => {
                   const sortDir =
@@ -445,7 +445,7 @@ export function EntityTable<T>({
                         </TableCell>
                       )}
                       {columns.map((col) => (
-                        <TableCell key={col.key} className={col.className}>
+                        <TableCell key={col.key} className={`py-2 text-[13px] ${col.className ?? ""}`}>
                           {col.render(row)}
                         </TableCell>
                       ))}
