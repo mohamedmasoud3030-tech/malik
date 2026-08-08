@@ -24,14 +24,10 @@ export const navGroups: readonly NavGroup[] = [
   ]],
   ['المالية', [
     ['/financials', 'financialOverview', 'نظرة عامة', PieChart],
-    ['/finance/collections?section=invoices', 'invoices', 'الفواتير', FileText],
-    ['/finance/collections?section=receipts', 'receipts', 'سندات القبض', ReceiptText],
-    ['/finance/expenses?section=expenses', 'expenses', 'المصروفات', WalletCards, 'expenses.view'],
-    ['/finance/expenses?section=arrears', 'arrears', 'المتأخرات', WalletCards, 'expenses.view'],
-    ['/finance/deposits?section=deposits', 'deposits', 'التأمينات', FileCheck, 'financial.deposits.view'],
-    ['/finance/deposits?section=owner_settlements', 'ownerSettlements', 'تسويات الملاك', FileCheck, 'financial.deposits.view'],
-    ['/finance/banking?section=bank_reconciliation', 'bankReconciliation', 'مطابقة البنك', Landmark, 'financial.bank_reconciliation.view'],
-    ['/finance/banking?section=commissions', 'commissions', 'العمولات', Landmark, 'financial.bank_reconciliation.view'],
+    ['/finance/collections', 'collectionsHub', 'التحصيل اليومي — الفواتير والإيصالات', ReceiptText],
+    ['/finance/expenses', 'expensesHub', 'المصروفات والذمم المتأخرة', WalletCards, 'expenses.view'],
+    ['/finance/deposits', 'depositsHub', 'التأمينات وتسويات الملاك', FileCheck, 'financial.deposits.view'],
+    ['/finance/banking', 'bankingHub', 'البنوك والمطابقة وعمولات المكتب', Landmark, 'financial.bank_reconciliation.view'],
   ]],
   ['التقارير', [
     ['/reports', 'reportsAndStatements', 'مركز التقارير والكشوفات التنفيذية الشاملة', BarChart3],
