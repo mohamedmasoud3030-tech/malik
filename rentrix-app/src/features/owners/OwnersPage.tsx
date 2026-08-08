@@ -2,7 +2,7 @@ import { Building2, LinkIcon, Plus, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmbeddableWorkspace } from '@/components/layout/embeddable-workspace';
 import { EntityForm } from '@/components/ui/entity-form';
-import { OperationalCommandPanel, OperationalMetricCard } from '@/components/ui/operational-summary';
+import { EnterpriseStats } from '@/components/enterprise/enterprise-stats';
 import { AsyncContentState } from '@/components/async-content-state';
 import { OwnerFormDialog } from './components/owner-form-dialog';
 import { OwnerRelationshipsList, OwnershipLinkForm } from './components/owner-relationships';
@@ -56,7 +56,7 @@ export function OwnersWorkspace({ embedded = false }: OwnersWorkspaceProps) {
       size="wide"
       visualVariant="malek-pro"
       title="إدارة الملاك"
-      description="مساحة تشغيل موحدة لملفات الملاك وربط العقارات ونسب الملكية، بعيدًا عن التسويات المالية."
+      description="المالك — العقار — نسبة الملكية"
       count={formatCount(controller.summary.totalOwners)}
       primaryAction={(
         <Button className="min-h-11" onClick={controller.openCreateForm}>
@@ -65,45 +65,14 @@ export function OwnersWorkspace({ embedded = false }: OwnersWorkspaceProps) {
         </Button>
       )}
     >
-      <section
-        data-owner-summary
-        aria-label="ملخص الملاك والملكية"
-        className="grid gap-3 lg:grid-cols-[minmax(17rem,1.05fr)_minmax(0,2fr)]"
-      >
-        <OperationalCommandPanel
-          label="تغطية ربط العقارات"
-          value={`${formatCount(linkedCoverage)}%`}
-          icon={LinkIcon}
-          progress={linkedCoverage}
-          footer={(
-            <>
-              <span>{formatCount(controller.summary.linkedPropertiesCount)} مرتبطة</span>
-              <span>{formatCount(controller.summary.propertiesWithoutLinkedOwner)} بلا مالك</span>
-            </>
-          )}
-        />
-
-        <div className="grid gap-3 sm:grid-cols-3">
-          <OperationalMetricCard
-            label="إجمالي الملاك"
-            value={formatCount(controller.summary.totalOwners)}
-            hint="كل ملفات الملاك"
-            icon={Users}
-          />
-          <OperationalMetricCard
-            label="الملاك النشطون"
-            value={formatCount(controller.summary.activeOwners)}
-            hint="متاحون للتشغيل والربط"
-            icon={Users}
-          />
-          <OperationalMetricCard
-            label="عقارات مرتبطة"
-            value={formatCount(controller.summary.linkedPropertiesCount)}
-            hint="علاقات ملكية سارية"
-            icon={Building2}
-          />
-        </div>
-      </section>
+      <EnterpriseStats
+        items={[
+          { key: "coverage", label: "تغطية الربط", value: `${formatCount(linkedCoverage)}%`, icon: LinkIcon },
+          { key: "total", label: "الملاك", value: formatCount(controller.summary.totalOwners), icon: Users },
+          { key: "active", label: "نشطون", value: formatCount(controller.summary.activeOwners), icon: Users },
+          { key: "linked", label: "مرتبطة", value: formatCount(controller.summary.linkedPropertiesCount), icon: Building2 },
+        ]}
+      />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.18fr)_minmax(22rem,0.82fr)]">
         <section
