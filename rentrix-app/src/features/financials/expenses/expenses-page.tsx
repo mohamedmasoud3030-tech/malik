@@ -129,7 +129,7 @@ export function ExpensesWorkspace({ embedded = false }: ExpensesWorkspaceProps) 
       embedded={embedded}
       size="default"
       title="المصاريف"
-      description="تسجيل ومراجعة مصاريف العقارات مع فلاتر للعقار والتصنيف والتاريخ."
+      description="المصروف — العقار — التصنيف — التاريخ"
       visualVariant="malek-pro"
       secondaryActions={
         <>
