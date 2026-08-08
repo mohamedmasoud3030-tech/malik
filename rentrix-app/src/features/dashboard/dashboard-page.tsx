@@ -150,7 +150,7 @@ export function DashboardPage() {
             </section>
 
             <section className="dashboard-section" aria-label="صورة الأداء" data-dashboard-section="kpis">
-              <SectionHeader title="صورة الأداء" description="أربع مؤشرات قرار مرتبطة بمصادرها التفصيلية" />
+              <SectionHeader title="صورة الأداء" description="الإشغال — التحصيل — المتأخرات — الصيانة" />
               <KpiGrid snapshot={snapshot} isLoading={isLoading} settings={settings} />
             </section>
 
@@ -161,7 +161,7 @@ export function DashboardPage() {
             ) : null}
 
             <section className="dashboard-section" aria-label="قوائم العمل" data-dashboard-section="work-queues">
-              <SectionHeader title="قوائم العمل" description="متابعة مركزة للحالات الأعلى أولوية بعد قراءة المؤشرات" />
+              <SectionHeader title="قوائم العمل" description="عاجل — منتهي — متأخر" />
               <div className="dashboard-queues-grid">
                 <ExpiringContractsSection rows={expiringContracts} isLoading={isLoading} settings={settings} />
                 <OverdueSection rows={overdueRows} isLoading={isLoading} settings={settings} />
@@ -169,13 +169,13 @@ export function DashboardPage() {
             </section>
 
             <section className="dashboard-section" aria-label="المحفظة والتحصيل" data-dashboard-section="trends">
-              <SectionHeader title="المحفظة والتحصيل" description="ملخصات ثانوية للانتقال إلى التفاصيل، وليست جدولاً محاسبياً كثيفاً" />
+              <SectionHeader title="المحفظة والتحصيل" description="العقار — الوحدة — التحصيل" />
               <DashboardCharts snapshot={snapshot} isLoading={isLoading} settings={settings} />
             </section>
 
             {showAnalytics ? (
               <section className="dashboard-section" aria-label="تحليلات مساندة" data-dashboard-section="analytics">
-                <SectionHeader title="تحليلات مساندة" description="تفاصيل أعمار الذمم بعد ترتيب الأعمال العاجلة" />
+                <SectionHeader title="تحليلات مساندة" description="أعمار المتأخرات" />
                 <ArrearsBreakdown snapshot={snapshot} settings={settings} />
               </section>
             ) : null}
