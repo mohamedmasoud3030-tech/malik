@@ -21,7 +21,7 @@ export function DepositsWorkspace({ embedded = false }: DepositsWorkspaceProps) 
       embedded={embedded}
       visualVariant="malek-pro"
       title="تأمين وأمانات المستأجرين"
-      description="تسجيل مبالغ التأمين المحتجزة للعقود النشطة، ومتابعة الخصومات والاستردادات مع مستندات الطباعة."
+      description="التأمين — الخصم — الاسترداد"
     >
       <DepositsWorkspaceBody />
     </EmbeddableWorkspace>

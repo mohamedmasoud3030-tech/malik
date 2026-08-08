@@ -313,7 +313,7 @@ export function TenantsWorkspace({ embedded = false }: TenantsWorkspaceProps) {
     <PageLayout dir="rtl" size="wide" visualVariant="malek-pro">
       <PageHeader
         title="المستأجرين"
-        description="مساحة تشغيل موحدة لمتابعة المستأجر والعقد والوحدة والحالة المالية من مكان واحد."
+        description="المستأجر — العقد — الوحدة — المستحق"
         count={totalCount}
         action={createAction}
       />
