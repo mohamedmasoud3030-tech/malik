@@ -103,7 +103,7 @@ export function BankReconciliationWorkspace({ embedded = false }: BankReconcilia
       visualVariant="malek-pro"
       embedded={embedded}
       title="مطابقة البنك"
-      description="مراجعة حركات كشف البنك ومطابقتها مع الدفعات أو الإيصالات أو المصروفات."
+      description="البنك — المطابقة — التسوية"
       secondaryActions={(
         <>
           <Button variant="secondary" disabled={!ctrl.canManageReconciliation || ctrl.accounts.length === 0} onClick={ctrl.openImportForm}>
@@ -170,7 +170,7 @@ export function BankReconciliationWorkspace({ embedded = false }: BankReconcilia
       {!ctrl.accountsQuery.isLoading && ctrl.accounts.length === 0 ? (
         <PageStateCard
           title="لا توجد حسابات بنكية بعد"
-          description="أضف حساباً بنكياً قبل تسجيل أو استيراد حركات كشف البنك."
+          description="البنك — المطابقة — التسوية"
         />
       ) : null}
 
@@ -200,13 +200,13 @@ export function BankReconciliationWorkspace({ embedded = false }: BankReconcilia
         open={ctrl.lineFormOpen}
         onOpenChange={(open) => { if (!ctrl.createLine.isPending) ctrl.setLineFormOpen(open); }}
         title="إضافة حركة كشف يدوية"
-        description="استخدم هذا النموذج للحركات التي لم تُستورد من كشف CSV."
+        description="البنك — المطابقة — التسوية"
       >
         <EntityForm.Root
           aria-busy={ctrl.createLine.isPending}
           onSubmit={ctrl.handleCreateLineSubmit}
         >
-          <EntityForm.Section title="بيانات الحركة" description="أدخل الحساب والتاريخ والوصف والمبلغ كما ظهر في كشف البنك.">
+          <EntityForm.Section title="بيانات الحركة" description="البنك — المطابقة — التسوية">
             <div className="grid gap-4 sm:grid-cols-2">
               <EntityForm.Field label="الحساب البنكي">
                 <Select required value={ctrl.lineDraft.bank_account_id} onChange={(event) => ctrl.setLineDraft({ ...ctrl.lineDraft, bank_account_id: event.target.value })}>
@@ -254,13 +254,13 @@ export function BankReconciliationWorkspace({ embedded = false }: BankReconcilia
         open={ctrl.matchFormOpen}
         onOpenChange={(open) => { if (!ctrl.matchLine.isPending) ctrl.setMatchFormOpen(open); }}
         title="مطابقة حركة بنكية"
-        description="اختر الحركة والسجل المقابل، ثم راجع مبلغ المطابقة قبل التأكيد."
+        description="البنك — المطابقة — التسوية"
       >
         <EntityForm.Root
           aria-busy={ctrl.matchLine.isPending}
           onSubmit={ctrl.handleMatchLineSubmit}
         >
-          <EntityForm.Section title="الحركة والسجل" description="الاقتراحات تعتمد على التاريخ والمبلغ فقط وتحتاج مراجعتك.">
+          <EntityForm.Section title="الحركة والسجل" description="البنك — المطابقة — التسوية">
             <EntityForm.Field label="الحركة غير المطابقة">
               <Select
                 required
