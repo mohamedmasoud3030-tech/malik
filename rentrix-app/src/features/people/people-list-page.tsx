@@ -31,31 +31,6 @@ function formatCount(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
 }
 
-: Readonly<{
-  label: string;
-  value: number;
-  hint: string;
-  icon: typeof Users;
-}>) {
-  return (
-    <article className="group relative overflow-hidden rounded-2xl border border-border/75 bg-card p-4 shadow-card">
-      <div
-        className="absolute inset-inline-end-0 inset-block-start-0 size-24 rounded-full bg-primary/7 blur-2xl transition-colors group-hover:bg-primary/12"
-        aria-hidden="true"
-      />
-      <div className="relative flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-bold text-muted-foreground">{label}</p>
-          <p className="mt-2 text-2xl font-black tabular-nums">{formatCount(value)}</p>
-          <p className="mt-1 text-[11px] font-medium text-muted-foreground">{hint}</p>
-        </div>
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-primary/15 bg-primary/8 text-primary">
-          <Icon className="size-5" aria-hidden="true" />
-        </span>
-      </div>
-    </article>
-  );
-}
 
 export type PeopleListPageProps = Readonly<{
   embedded?: boolean;
